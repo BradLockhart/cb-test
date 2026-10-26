@@ -1,4 +1,5 @@
 using Infrastructure;
+using Interview.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 
 var app = builder.Build();
@@ -22,8 +25,7 @@ if (builder.Configuration.GetValue("HttpsRedirection:Enabled", true))
     app.UseHttpsRedirection();
 }
 
-app.MapGet("/", () => (object?)null)
-    .WithName("Default Endpoint");
+app.MapControllers();
 
 await app.Services.InitialiseInfrastructureAsync();
 

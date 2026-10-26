@@ -7,4 +7,5 @@ public sealed class Product
     public required string Sku { get; set; }
     public bool IsActive { get; set; }
     public Guid? CategoryId { get; set; }
+    public Category? Category { get; set; }
 }

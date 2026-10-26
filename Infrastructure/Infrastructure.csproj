@@ -11,6 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Interview.Application\Interview.Application.csproj" />
         <ProjectReference Include="..\Interview.Domain\Interview.Domain.csproj" />
     </ItemGroup>
 

@@ -1,5 +1,6 @@
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Seeding;
+using Interview.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +12,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<InterviewDbContext>(options =>
             options.UseInMemoryDatabase("Default"));
+        services.AddScoped<IProductRepository, ProductRepository>();
 
         return services;
     }
