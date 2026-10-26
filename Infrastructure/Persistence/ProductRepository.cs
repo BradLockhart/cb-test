@@ -8,27 +8,35 @@ namespace Infrastructure.Persistence;
 internal sealed class ProductRepository(InterviewDbContext context) : IProductRepository
 {
     public async Task<PagedResult<Product>> GetPageAsync(
-        int page,
-        int pageSize,
+        ProductQuery query,
         CancellationToken cancellationToken = default)
     {
-        var products = context.Products
+        IQueryable<Product> products = context.Products
             .AsNoTracking()
             .Include(product => product.Category);
+
+        if (query.Search is not null)
+        {
+            var search = query.Search.ToLowerInvariant();
+
+            products = products.Where(product =>
+                product.Name.ToLower().Contains(search) ||
+                product.Sku.ToLower().Contains(search));
+        }
 
         var totalItems = await products.CountAsync(cancellationToken);
 
         var items = await products
             .OrderBy(product => product.Name)
             .ThenBy(product => product.Id)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((query.Page - 1) * query.PageSize)
+            .Take(query.PageSize)
             .ToListAsync(cancellationToken);
 
         return new PagedResult<Product>(
             items,
-            page,
-            pageSize,
+            query.Page,
+            query.PageSize,
             totalItems);
     }
 }

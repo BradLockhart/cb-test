@@ -35,7 +35,9 @@ public sealed class ProductServiceTests
 
         using var cancellationSource = new CancellationTokenSource();
 
-        var result = await service.GetProductsAsync(2, 5, cancellationSource.Token);
+        var result = await service.GetProductsAsync(
+            new ProductQuery("  gpu  ", 2, 5),
+            cancellationSource.Token);
 
         Assert.Equal(2, result.Page);
         Assert.Equal(5, result.PageSize);
@@ -51,8 +53,9 @@ public sealed class ProductServiceTests
         Assert.Equal(category.CategoryId, item.Category.Id);
         Assert.Equal(category.Name, item.Category.Name);
 
-        Assert.Equal(2, repository.RequestedPage);
-        Assert.Equal(5, repository.RequestedPageSize);
+        Assert.Equal("gpu", repository.Query?.Search);
+        Assert.Equal(2, repository.Query?.Page);
+        Assert.Equal(5, repository.Query?.PageSize);
         Assert.Equal(cancellationSource.Token, repository.CancellationToken);
     }
 
@@ -72,7 +75,7 @@ public sealed class ProductServiceTests
 
         var service = new ProductService(repository);
 
-        var result = await service.GetProductsAsync(1, 10);
+        var result = await service.GetProductsAsync(new ProductQuery(null, 1, 10));
 
         var item = Assert.Single(result.Items);
         Assert.Null(item.Category);
@@ -92,7 +95,21 @@ public sealed class ProductServiceTests
         var service = new ProductService(repository);
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
-            () => service.GetProductsAsync(page, pageSize));
+            () => service.GetProductsAsync(new ProductQuery(null, page, pageSize)));
+
+        Assert.False(repository.WasCalled);
+    }
+
+    [Fact]
+    public async Task GetProductsAsync_WhenSearchIsTooLong_Throws()
+    {
+        var repository = new FakeProductRepository(
+            new PagedResult<Product>([], 1, 10, 0));
+        var service = new ProductService(repository);
+        var search = new string('a', ProductQuery.MaximumSearchLength + 1);
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => service.GetProductsAsync(new ProductQuery(search, 1, 10)));
 
         Assert.False(repository.WasCalled);
     }
@@ -101,18 +118,15 @@ public sealed class ProductServiceTests
         : IProductRepository
     {
         public bool WasCalled { get; private set; }
-        public int? RequestedPage { get; private set; }
-        public int? RequestedPageSize { get; private set; }
+        public ProductQuery? Query { get; private set; }
         public CancellationToken CancellationToken { get; private set; }
 
         public Task<PagedResult<Product>> GetPageAsync(
-            int page,
-            int pageSize,
+            ProductQuery query,
             CancellationToken cancellationToken = default)
         {
             WasCalled = true;
-            RequestedPage = page;
-            RequestedPageSize = pageSize;
+            Query = query;
             CancellationToken = cancellationToken;
 
             return Task.FromResult(result);

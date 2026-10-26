@@ -7,15 +7,28 @@ namespace Interview.Application.Services;
 public sealed class ProductService(IProductRepository repository) : IProductService
 {
     public async Task<PagedResult<ProductDto>> GetProductsAsync(
-        int page,
-        int pageSize,
+        ProductQuery query,
         CancellationToken cancellationToken = default)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(page, 1);
-        ArgumentOutOfRangeException.ThrowIfLessThan(pageSize, 1);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(pageSize, Pagination.MaximumPageSize);
+        ArgumentNullException.ThrowIfNull(query);
+        ArgumentOutOfRangeException.ThrowIfLessThan(query.Page, 1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(query.PageSize, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(query.PageSize, Pagination.MaximumPageSize);
 
-        var result = await repository.GetPageAsync(page, pageSize, cancellationToken);
+        var search = string.IsNullOrWhiteSpace(query.Search)
+            ? null
+            : query.Search.Trim();
+
+        if (search?.Length > ProductQuery.MaximumSearchLength)
+        {
+            throw new ArgumentException(
+                $"Search cannot exceed {ProductQuery.MaximumSearchLength} characters.",
+                nameof(query));
+        }
+
+        var result = await repository.GetPageAsync(
+            query with { Search = search },
+            cancellationToken);
 
         var items = result.Items
             .Select(product => new ProductDto(

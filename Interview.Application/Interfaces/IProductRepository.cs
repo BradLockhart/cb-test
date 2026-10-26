@@ -6,7 +6,6 @@ namespace Interview.Application.Interfaces;
 public interface IProductRepository
 {
     Task<PagedResult<Product>> GetPageAsync(
-        int page,
-        int pageSize,
+        ProductQuery query,
         CancellationToken cancellationToken = default);
 }

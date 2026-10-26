@@ -1,4 +1,5 @@
 using Interview.API.Controllers;
+using Interview.API.Models;
 using Interview.Application.DTOs;
 using Interview.Application.Interfaces;
 using Interview.Application.Models;
@@ -24,29 +25,34 @@ public sealed class ProductsControllerTests
 
         using var cancellationSource = new CancellationTokenSource();
 
-        var response = await controller.GetProducts(2, 5, cancellationSource.Token);
+        var request = new GetProductsRequest
+        {
+            Search = "GPU",
+            Page = 2,
+            PageSize = 5
+        };
+
+        var response = await controller.GetProducts(request, cancellationSource.Token);
 
         var okResult = Assert.IsType<OkObjectResult>(response.Result);
 
         Assert.Same(expected, okResult.Value);
-        Assert.Equal(2, service.RequestedPage);
-        Assert.Equal(5, service.RequestedPageSize);
+        Assert.Equal("GPU", service.Query?.Search);
+        Assert.Equal(2, service.Query?.Page);
+        Assert.Equal(5, service.Query?.PageSize);
         Assert.Equal(cancellationSource.Token, service.CancellationToken);
     }
 
     private sealed class FakeProductService(PagedResult<ProductDto> result) : IProductService
     {
-        public int? RequestedPage { get; private set; }
-        public int? RequestedPageSize { get; private set; }
+        public ProductQuery? Query { get; private set; }
         public CancellationToken CancellationToken { get; private set; }
 
         public Task<PagedResult<ProductDto>> GetProductsAsync(
-            int page,
-            int pageSize,
+            ProductQuery query,
             CancellationToken cancellationToken = default)
         {
-            RequestedPage = page;
-            RequestedPageSize = pageSize;
+            Query = query;
             CancellationToken = cancellationToken;
 
             return Task.FromResult(result);

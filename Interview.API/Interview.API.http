@@ -1,6 +1,6 @@
 @Interview.API_HostAddress = http://localhost:8080
 
-GET {{Interview.API_HostAddress}}/products?page=1&pageSize=10
+GET {{Interview.API_HostAddress}}/products?search=AMD&page=1&pageSize=10
 Accept: application/json
 
 ###
