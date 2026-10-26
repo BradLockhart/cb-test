@@ -16,7 +16,8 @@ body {
 }
 
 button,
-select {
+select,
+input {
   font: inherit;
 }
 
@@ -58,6 +59,26 @@ h1 {
 header p {
   margin: 0 0 24px;
   color: #555;
+}
+
+.search {
+  margin-bottom: 24px;
+}
+
+.search label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.search div {
+  display: flex;
+  gap: 8px;
+}
+
+.search input {
+  width: min(360px, 100%);
+  padding: 8px;
+  border: 1px solid #777;
 }
 
 .catalogue {

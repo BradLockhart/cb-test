@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { getProducts } from "./api/productsApi";
 import { PaginationControls } from "./components/PaginationControls";
 import { ProductList } from "./components/ProductList";
@@ -9,6 +9,8 @@ const DEFAULT_PAGE_SIZE = 10;
 export default function App() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const [result, setResult] = useState<PagedResult<Product> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +24,7 @@ export default function App() {
       setError(null);
 
       try {
-        const products = await getProducts(page, pageSize, controller.signal);
+        const products = await getProducts(search, page, pageSize, controller.signal);
         setResult(products);
       } catch (requestError) {
         if (requestError instanceof DOMException && requestError.name === "AbortError") {
@@ -44,17 +46,47 @@ export default function App() {
     void loadProducts();
 
     return () => controller.abort();
-  }, [page, pageSize, reloadKey]);
+  }, [page, pageSize, search, reloadKey]);
 
   function changePageSize(nextPageSize: number) {
     setPage(1);
     setPageSize(nextPageSize);
   }
 
+  function submitSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPage(1);
+    setSearch(searchInput.trim());
+  }
+
+  function clearSearch() {
+    setSearchInput("");
+    setSearch("");
+    setPage(1);
+  }
+
   return (
     <main>
       <header>
         <h1>Products</h1>
+        <form className="search" role="search" onSubmit={submitSearch}>
+          <label htmlFor="product-search">Search by product name or SKU</label>
+          <div>
+            <input
+              id="product-search"
+              type="search"
+              value={searchInput}
+              maxLength={100}
+              onChange={(event) => setSearchInput(event.target.value)}
+            />
+            <button type="submit" disabled={isLoading}>Search</button>
+            {search && (
+              <button type="button" disabled={isLoading} onClick={clearSearch}>
+                Clear
+              </button>
+            )}
+          </div>
+        </form>
       </header>
 
       <section className="catalogue" aria-labelledby="catalogue-heading">

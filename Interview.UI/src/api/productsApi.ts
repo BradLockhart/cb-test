@@ -1,6 +1,7 @@
 import type { PagedResult, Product } from "../types/product";
 
 export async function getProducts(
+  search: string,
   page: number,
   pageSize: number,
   signal: AbortSignal,
@@ -9,6 +10,10 @@ export async function getProducts(
     page: page.toString(),
     pageSize: pageSize.toString(),
   });
+
+  if (search) {
+    parameters.set("search", search);
+  }
 
   const response = await fetch(`/products?${parameters}`, { signal });
 
