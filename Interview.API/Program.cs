@@ -1,6 +1,4 @@
 using Infrastructure;
-using Infrastructure.Helpers;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<InMemDbContext>(options => options.UseInMemoryDatabase("Default"));
+builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 
@@ -19,28 +17,14 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+if (builder.Configuration.GetValue("HttpsRedirection:Enabled", true))
+{
+    app.UseHttpsRedirection();
+}
 
 app.MapGet("/", () => (object?)null)
     .WithName("Default Endpoint");
 
-# region InMemoryDB Setup
-using (IServiceScope scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<InMemDbContext>();
-
-    if (!context.Categories.Any())
-    {
-        context.Categories.AddRange(InitialDataSet.GetCategories());
-        context.SaveChanges();
-    }
-
-    if (!context.Products.Any())
-    {
-        context.Products.AddRange(InitialDataSet.Get());
-        context.SaveChanges();
-    }
-}
-# endregion
+await app.Services.InitialiseInfrastructureAsync();
 
 app.Run();
