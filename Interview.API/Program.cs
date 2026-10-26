@@ -25,6 +25,8 @@ if (builder.Configuration.GetValue("HttpsRedirection:Enabled", true))
     app.UseHttpsRedirection();
 }
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.MapControllers();
 
 await app.Services.InitialiseInfrastructureAsync();

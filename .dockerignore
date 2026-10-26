@@ -8,6 +8,8 @@
 **/obj
 **/out
 **/TestResults
+**/node_modules
+**/dist
 
 *.suo
 *.user

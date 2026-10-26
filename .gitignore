@@ -31,6 +31,11 @@ out/
 .idea/
 *.sln.iml
 
+# Node / Vite
+node_modules/
+dist/
+*.tsbuildinfo
+
 # NuGet
 *.nupkg
 *.snupkg

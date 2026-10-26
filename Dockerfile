@@ -1,6 +1,16 @@
 # syntax=docker/dockerfile:1
 
 ARG DOTNET_VERSION=10.0
+ARG NODE_VERSION=24
+
+FROM node:${NODE_VERSION}-alpine AS ui-build
+WORKDIR /src/Interview.UI
+
+COPY ["Interview.UI/package.json", "Interview.UI/package-lock.json", "./"]
+RUN npm ci
+
+COPY Interview.UI/ .
+RUN npm run build
 
 FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} AS build
 WORKDIR /src
@@ -30,4 +40,5 @@ EXPOSE 8080
 USER $APP_UID
 
 COPY --from=build /app/publish .
+COPY --from=ui-build /src/Interview.UI/dist ./wwwroot
 ENTRYPOINT ["dotnet", "Interview.API.dll"]
