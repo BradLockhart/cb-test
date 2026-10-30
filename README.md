@@ -20,7 +20,7 @@ dotnet test Interview.sln
 
 ## UPDATE - AI usage and engineering rationale
 
-I've updated the project files within this commit, with what is basically me narrating through the high-level components within the code with brief line by line thoughts and understanding of what my solution is doing throughout the Program.cs, Controller, Service, and Repository within the .NET sln, and the App.tsx within the React app.
+I've updated the project files within this commit (https://github.com/BradLockhart/cb-test/commit/2a72390f4f4c3c6c8f06f96437bb8850b447ae28), with what is basically me narrating through the high-level components within the code with brief line by line thoughts and understanding of what my solution is doing throughout the Program.cs, Controller, Service, and Repository within the .NET sln, and the App.tsx within the React app.
 
 
 
